@@ -135,7 +135,10 @@ func (b *Builder) dockerCLIBuild(ctx context.Context, out io.Writer, name string
 	cmd.Stdout = out
 
 	var errBuffer bytes.Buffer
-	stderr := io.MultiWriter(out, &errBuffer)
+	stderr := &errWriter{
+		Out: out,
+		Buf: errBuffer,
+	}
 	cmd.Stderr = stderr
 
 	if err := util.RunCmd(ctx, cmd); err != nil {

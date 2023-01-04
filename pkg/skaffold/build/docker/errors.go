@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"regexp"
 
 	"github.com/docker/docker/errdefs"
@@ -35,6 +36,19 @@ var (
 	noSpaceLeft   = regexp.MustCompile(".*no space left.*")
 	execFormatErr = regexp.MustCompile(".*exec format error.*")
 )
+
+type errWriter struct {
+	Out io.Writer
+	Buf bytes.Buffer
+}
+
+func (w *errWriter) Write(p []byte) (int, error) {
+	if p, err := w.Buf.Write(p); err != nil {
+		return p, err
+	}
+
+	return w.Buf.Write(p)
+}
 
 // newBuildError turns Docker-specific errors into actionable errors.
 // The input errors are assumed to be from the Skaffold docker invocation.
